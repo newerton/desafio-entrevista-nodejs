@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
