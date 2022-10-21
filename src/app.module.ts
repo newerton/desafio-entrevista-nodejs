@@ -1,12 +1,28 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { CompanyModule } from './company/company.module';
-import { VehicleModule } from './vehicle/vehicle.module';
+import { ConfigModule } from '@nestjs/config';
+import * as Joi from 'joi';
 
+import configuration from '@common/config/configuration';
+
+import { CompanyModule } from './app/company/company.module';
+import { VehicleModule } from './app/vehicle/vehicle.module';
 @Module({
-  imports: [CompanyModule, VehicleModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+      validationSchema: Joi.object({
+        DB_DIALECT: Joi.string().required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().required(),
+        DB_USER: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_DATABASE: Joi.string().required(),
+        DB_LOGGING: Joi.boolean().required(),
+      }),
+    }),
+    CompanyModule,
+    VehicleModule,
+  ],
 })
 export class AppModule {}
