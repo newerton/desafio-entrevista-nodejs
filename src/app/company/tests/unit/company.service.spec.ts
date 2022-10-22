@@ -2,7 +2,19 @@ import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 import { cnpj } from 'cpf-cnpj-validator';
 
-import { CompanyOutput, CompanyService } from '@app/company/company.service';
+import { CompanyService } from '@app/company/company.service';
+import { CompanyOutput } from '@app/company/dto/company.dto';
+import { CreateCompanyInput } from '@app/company/dto/create-company.dto';
+
+const mockCreateRequest = (): CreateCompanyInput => {
+  const password = faker.internet.password();
+  return {
+    fantasy_name: faker.company.name(),
+    email: faker.internet.email(),
+    password,
+    password_confirm: password,
+  };
+};
 
 describe('CompanyService', () => {
   let service: CompanyService;
@@ -62,10 +74,33 @@ describe('CompanyService', () => {
     });
 
     it('should show a empty object of company', async () => {
-      const result: CompanyOutput = {};
+      const result = {};
       jest.spyOn(service, 'findOne').mockImplementation(async () => result);
 
       expect(await service.findOne(9999)).toBe(result);
+    });
+  });
+
+  describe('create', () => {
+    it('should return an empty response', async () => {
+      const request = mockCreateRequest();
+      jest.spyOn(service, 'create').mockImplementation(async () => undefined);
+      expect(await service.create(request)).toBe(undefined);
+    });
+  });
+
+  describe('update', () => {
+    it('should return an empty response', async () => {
+      const request = mockCreateRequest();
+      jest.spyOn(service, 'update').mockImplementation(async () => undefined);
+      expect(await service.update(1, request)).toBe(undefined);
+    });
+  });
+
+  describe('update', () => {
+    it('should return an empty response', async () => {
+      jest.spyOn(service, 'remove').mockImplementation(async () => undefined);
+      expect(await service.remove(1)).toBe(undefined);
     });
   });
 });

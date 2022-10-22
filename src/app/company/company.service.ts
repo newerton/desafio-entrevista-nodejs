@@ -1,27 +1,28 @@
 import { Injectable } from '@nestjs/common';
 
-import { CreateCompanyDto } from './dto/create-company.dto';
+import { CompanyOutput } from './dto/company.dto';
+import { CreateCompanyInput } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Injectable()
 export class CompanyService {
-  create(createCompanyDto: CreateCompanyDto) {
-    return 'This action adds a new company';
+  async create(createCompanyDto: CreateCompanyInput): Promise<void> {
+    return Promise.resolve();
   }
 
-  findAll() {
-    return `This action returns all company`;
+  async findAll(): Promise<CompanyOutput[]> {
+    return;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  async findOne(id: number): Promise<CompanyOutput | Record<string, never>> {
+    return;
   }
 
-  update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    return `This action updates a #${id} company`;
+  async update(id: number, updateCompanyDto: UpdateCompanyDto): Promise<void> {
+    return Promise.resolve();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} company`;
+  async remove(id: number): Promise<void> {
+    return Promise.resolve();
   }
 }
