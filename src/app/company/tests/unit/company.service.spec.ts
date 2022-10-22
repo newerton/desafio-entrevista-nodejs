@@ -149,7 +149,7 @@ describe('CompanyService', () => {
     });
   });
 
-  describe('update', () => {
+  describe('remove', () => {
     it('should return an empty response', async () => {
       jest.spyOn(service, 'remove').mockImplementation(async () => undefined);
       expect(await service.remove(1)).toBe(undefined);
