@@ -1,6 +1,6 @@
 <h1 align="center">
 
-![Parking](https://raw.githubusercontent.com/newerton/desafio-entrevista-nodejs/main/images/logo.png)
+![Parking](https://raw.githubusercontent.com/newerton/desafio-entrevista-nodejs/main/public/logo.jpg)
 
   <a>
     Teste Técnico - Dr Consulta
