@@ -1,13 +1,13 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 
 import { IbgeConnectorModule } from '@common/libs/ibge/src';
 
 import { IbgeStateFixture } from '../../fixtures';
 import { IbgeStateModule } from '../../ibge-state.module';
 
-describe('IbgeState', () => {
+describe('IbgeState (e2e)', () => {
   let app: INestApplication;
   const service = { findAll: () => ['test'] };
 

@@ -4,12 +4,13 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { cnpj } from 'cpf-cnpj-validator';
 
 import { CompanyController } from '@app/company/company.controller';
 import { CompanyService } from '@app/company/company.service';
-import { CompanyOutput } from '@app/company/dto/company.dto';
 import { CreateCompanyInput } from '@app/company/dto/create-company.dto';
+import { Company } from '@app/company/entities/company.entity';
+
+import { CompanyFakeBuilder } from '../company-fake-builder';
 
 export const throwNotFoundException = (message?: string): never => {
   throw new NotFoundException(message);
@@ -26,19 +27,6 @@ const mockCreateRequest = (): CreateCompanyInput => {
     email: faker.internet.email(),
     password,
     password_confirm: password,
-  };
-};
-
-const mockOutput = (): CompanyOutput => {
-  return {
-    id: faker.datatype.uuid(),
-    social_name: faker.company.name(),
-    fantasy_name: faker.company.name(),
-    email: faker.internet.email(),
-    document: cnpj.generate(),
-    phone: '(11) 9 9876-5432',
-    is_active: true,
-    created_at: new Date(),
   };
 };
 
@@ -63,14 +51,14 @@ describe('CompanyController', () => {
 
   describe('findAll', () => {
     it('should return an array of companies', async () => {
-      const result: CompanyOutput[] = [mockOutput()];
+      const result: Company[] = CompanyFakeBuilder.theCompanies(2).build();
       jest.spyOn(service, 'findAll').mockImplementation(async () => result);
 
       expect(await controller.findAll()).toBe(result);
     });
 
     it('should return an empty array', async () => {
-      const result: CompanyOutput[] = [];
+      const result: Company[] = [];
       jest.spyOn(service, 'findAll').mockImplementation(async () => result);
 
       expect(await controller.findAll()).toBe(result);
@@ -79,7 +67,7 @@ describe('CompanyController', () => {
 
   describe('findOne', () => {
     it('should return a object of company', async () => {
-      const result: CompanyOutput = mockOutput();
+      const result: Company = CompanyFakeBuilder.aCompany().build();
       jest.spyOn(service, 'findOne').mockImplementation(async () => result);
 
       expect(await controller.findOne('valid_uuid')).toBe(result);
