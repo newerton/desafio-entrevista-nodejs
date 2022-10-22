@@ -37,3 +37,7 @@ lerna-debug.log*
 
 # Plugin - VSCode
 /.history
+
+# Mysql DB Data
+/.docker/mysql/dbdata/*
+!/.docker/mysql/dbdata

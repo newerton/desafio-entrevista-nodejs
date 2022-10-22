@@ -11,7 +11,7 @@ export class CreateCompany1666382287263 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'varchar',
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'uuid',

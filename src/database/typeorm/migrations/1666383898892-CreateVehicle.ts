@@ -14,14 +14,15 @@ export class CreateVehicle1666383898892 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'varchar',
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'uuid',
           },
           {
             name: 'vehicle_type_id',
-            type: 'uuid',
+            type: 'varchar',
+            generationStrategy: 'uuid',
           },
           {
             name: 'type',

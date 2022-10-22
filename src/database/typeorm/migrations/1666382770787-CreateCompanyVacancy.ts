@@ -14,18 +14,20 @@ export class CreateCompanyVacancy1666382770787 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'varchar',
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'uuid',
           },
           {
             name: 'company_id',
-            type: 'uuid',
+            type: 'varchar',
+            generationStrategy: 'uuid',
           },
           {
             name: 'vehicle_id',
-            type: 'uuid',
+            type: 'varchar',
+            generationStrategy: 'uuid',
           },
           {
             name: 'quantity',

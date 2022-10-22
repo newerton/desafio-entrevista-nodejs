@@ -14,14 +14,15 @@ export class CreateCompanyAddress1666382957880 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'uuid',
+            type: 'varchar',
             isPrimary: true,
             isGenerated: true,
             generationStrategy: 'uuid',
           },
           {
             name: 'company_id',
-            type: 'uuid',
+            type: 'varchar',
+            generationStrategy: 'uuid',
           },
           {
             name: 'zipcode',
@@ -47,11 +48,11 @@ export class CreateCompanyAddress1666382957880 implements MigrationInterface {
           },
           {
             name: 'state_id',
-            type: 'uuid',
+            type: 'int',
           },
           {
             name: 'city_id',
-            type: 'uuid',
+            type: 'int',
           },
           {
             name: 'created_at',

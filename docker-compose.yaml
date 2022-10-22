@@ -1,24 +1,21 @@
 version: '3'
 
 services:
-  postgres:
-    image: postgres:14
-    container_name: parking-postgres
+  db:
+    image: mysql:8
+    container_name: parking-db
+    command: --innodb_use_native_aio=0
     restart: always
     tty: true
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - ./.docker/mysql/dbdata:/var/lib/mysql
+      - ./.docker/mysql/init:/docker-entrypoint-initdb.d
     ports:
-      - '5432:5432'
+      - '3306:3306'
     environment:
-      - POSTGRES_USER=docker
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=parking
+      - MYSQL_ROOT_PASSWORD=docker
     networks:
       - default
-
-volumes:
-  db_data: {}
 
 networks:
   default:
