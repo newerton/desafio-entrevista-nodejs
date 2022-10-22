@@ -1,10 +1,22 @@
 import { faker } from '@faker-js/faker';
+import {
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { cnpj } from 'cpf-cnpj-validator';
 
 import { CompanyService } from '@app/company/company.service';
 import { CompanyOutput } from '@app/company/dto/company.dto';
 import { CreateCompanyInput } from '@app/company/dto/create-company.dto';
+
+export const throwNotFoundException = (message?: string): never => {
+  throw new NotFoundException(message);
+};
+
+export const throwUnprocessableEntityException = (message?: string): never => {
+  throw new UnprocessableEntityException(message);
+};
 
 const mockCreateRequest = (): CreateCompanyInput => {
   const password = faker.internet.password();
@@ -73,11 +85,19 @@ describe('CompanyService', () => {
       expect(await service.findOne(11)).toBe(result);
     });
 
-    it('should show a empty object of company', async () => {
-      const result = {};
-      jest.spyOn(service, 'findOne').mockImplementation(async () => result);
+    it('should throw NotFoundException if company not found', async () => {
+      jest
+        .spyOn(service, 'findOne')
+        .mockImplementationOnce(() =>
+          throwNotFoundException('Company not found'),
+        );
 
-      expect(await service.findOne(9999)).toBe(result);
+      try {
+        await service.findOne(999);
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        expect(e.message).toBe('Company not found');
+      }
     });
   });
 
@@ -87,6 +107,22 @@ describe('CompanyService', () => {
       jest.spyOn(service, 'create').mockImplementation(async () => undefined);
       expect(await service.create(request)).toBe(undefined);
     });
+
+    it('should throw UnprocessableEntityException if company already registered', async () => {
+      const request = mockCreateRequest();
+      jest
+        .spyOn(service, 'create')
+        .mockImplementationOnce(() =>
+          throwUnprocessableEntityException('Company already registered'),
+        );
+
+      try {
+        await service.create(request);
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnprocessableEntityException);
+        expect(e.message).toBe('Company already registered');
+      }
+    });
   });
 
   describe('update', () => {
@@ -95,12 +131,43 @@ describe('CompanyService', () => {
       jest.spyOn(service, 'update').mockImplementation(async () => undefined);
       expect(await service.update(1, request)).toBe(undefined);
     });
+
+    it('should throw NotFoundException if company not found', async () => {
+      const request = mockCreateRequest();
+      jest
+        .spyOn(service, 'update')
+        .mockImplementationOnce(() =>
+          throwNotFoundException('Company not found'),
+        );
+
+      try {
+        await service.update(1, request);
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        expect(e.message).toBe('Company not found');
+      }
+    });
   });
 
   describe('update', () => {
     it('should return an empty response', async () => {
       jest.spyOn(service, 'remove').mockImplementation(async () => undefined);
       expect(await service.remove(1)).toBe(undefined);
+    });
+
+    it('should throw NotFoundException if company not found', async () => {
+      jest
+        .spyOn(service, 'remove')
+        .mockImplementationOnce(() =>
+          throwNotFoundException('Company not found'),
+        );
+
+      try {
+        await service.remove(1);
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        expect(e.message).toBe('Company not found');
+      }
     });
   });
 });
