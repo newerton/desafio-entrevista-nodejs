@@ -28,7 +28,6 @@ const testConfig: DataSourceOptions = {
   database: `${process.env.DB_DATABASE}_test`,
   logging: false,
   synchronize: true,
-  dropSchema: true,
 };
 
 export const databaseConfig =
