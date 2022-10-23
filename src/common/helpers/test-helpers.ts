@@ -25,22 +25,10 @@ export async function createNestApplication({
 }
 
 export async function clearRepositories(dataSource: DataSource) {
-  // console.log({ dataSource });
   const entities = dataSource.entityMetadatas;
-  const promises: Array<Promise<DeleteResult>> = [];
 
   for (const entity of entities) {
     const repository = dataSource.getRepository(entity.name);
-    promises.push(repository.delete({}));
+    await repository.delete({});
   }
-
-  await Promise.all(promises);
 }
-
-// const entities = dataSource.entityMetadatas;
-//   for (const entity of entities) {
-//     const queryRunner = dataSource.createQueryRunner();
-//     await queryRunner.manager.query(`SET FOREIGN_KEY_CHECKS = 0`);
-//     // await queryRunner.manager.query(`TRUNCATE \`${entity.tableName}\``);
-//     await queryRunner.manager.query(`SET FOREIGN_KEY_CHECKS = 1`);
-//   }
