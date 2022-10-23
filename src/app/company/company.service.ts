@@ -1,6 +1,4 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { hash } from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable } from '@nestjs/common';
 
 import { CompanyRepository } from './company.repository';
 import { CreateCompanyInput } from './dto/create-company.dto';
