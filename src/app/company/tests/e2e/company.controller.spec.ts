@@ -1,8 +1,6 @@
-import {
-  HttpStatus,
-  INestApplication,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { faker } from '@faker-js/faker';
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import dayjs from 'dayjs';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 
@@ -11,7 +9,7 @@ import {
   clearRepositories,
   createNestApplication,
 } from '@common/helpers/test-helpers';
-import { uuidValidateV4 } from '@common/utils/validate-uuid-v4';
+import { validateUUIDV4 } from '@common/utils/validate-uuid-v4';
 
 import { CompanyFakeBuilder } from '../company-fake-builder';
 
@@ -117,6 +115,75 @@ describe('Company - /companies (e2e)', () => {
       statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       message: 'Company already registered',
       error: 'Unprocessable Entity',
+    });
+  });
+
+  it(`/PATCH companies (UnprocessableEntityException: Company already registered)`, async () => {
+    const payload = CompanyFakeBuilder.aCompany()
+      .withEmail('company@company.com')
+      .build();
+
+    await request(app.getHttpServer())
+      .post('/companies')
+      .send(payload)
+      .expect(HttpStatus.CREATED);
+
+    const createdCompany = await request(app.getHttpServer())
+      .get('/companies')
+      .expect(HttpStatus.OK);
+
+    expect(validateUUIDV4(createdCompany.body[0].id)).toBeTruthy();
+    expect(createdCompany.body[0].social_name).toBeNull();
+    expect(createdCompany.body[0].fantasy_name).toEqual(payload.fantasy_name);
+    expect(createdCompany.body[0].email).toEqual('company@company.com');
+    expect(createdCompany.body[0].document).toEqual(payload.document);
+    expect(createdCompany.body[0].phone).toEqual(payload.phone);
+    expect(createdCompany.body[0].is_active).toEqual(payload.is_active);
+    expect(dayjs(createdCompany.body[0].created_at).isValid()).toBeTruthy();
+    expect(dayjs(createdCompany.body[0].updated_at).isValid()).toBeTruthy();
+
+    const { id } = createdCompany.body[0];
+    await request(app.getHttpServer())
+      .patch(`/companies/${id}`)
+      .send({ social_name: `${payload.social_name} UPDATED` })
+      .expect(HttpStatus.NO_CONTENT);
+
+    const updatedCompany = await request(app.getHttpServer())
+      .get(`/companies/${id}`)
+      .expect(HttpStatus.OK);
+
+    expect(updatedCompany.body.social_name).toEqual(
+      `${payload.social_name} UPDATED`,
+    );
+    expect(dayjs(updatedCompany.body.updated_at).isValid()).toBeTruthy();
+
+    expect(createdCompany.body[0].id).toEqual(updatedCompany.body.id);
+    expect(createdCompany.body[0].fantasy_name).toEqual(
+      updatedCompany.body.fantasy_name,
+    );
+    expect(createdCompany.body[0].email).toEqual('company@company.com');
+    expect(createdCompany.body[0].document).toEqual(
+      updatedCompany.body.document,
+    );
+    expect(createdCompany.body[0].phone).toEqual(updatedCompany.body.phone);
+    expect(createdCompany.body[0].is_active).toEqual(
+      updatedCompany.body.is_active,
+    );
+    expect(createdCompany.body[0].created_at).toEqual(
+      updatedCompany.body.created_at,
+    );
+  });
+
+  it(`/PATCH companies (NotFoundException: Company not found)`, async () => {
+    const response = await request(app.getHttpServer())
+      .patch(`/companies/${faker.datatype.uuid()}`)
+      .send({ social_name: `${faker.company.name()} UPDATED` })
+      .expect(HttpStatus.NOT_FOUND);
+
+    await expect(response.body).toStrictEqual({
+      statusCode: HttpStatus.NOT_FOUND,
+      message: 'Company not found',
+      error: 'Not Found',
     });
   });
 });

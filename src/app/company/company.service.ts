@@ -1,25 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { hash } from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
-import { CompanyOutput } from './dto/company.dto';
+import { CompanyRepository } from './company.repository';
 import { CreateCompanyInput } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
-
+import { UpdateCompanyInput } from './dto/update-company.dto';
+import { Company } from './entities/company.entity';
 @Injectable()
 export class CompanyService {
+  constructor(private readonly repository: CompanyRepository) {}
+
   async create(createCompanyDto: CreateCompanyInput): Promise<void> {
-    return Promise.resolve();
+    return this.repository.createCompany(createCompanyDto);
   }
 
-  async findAll(): Promise<CompanyOutput[]> {
-    return;
+  async findAll(): Promise<Company[]> {
+    return this.repository.findAll();
   }
 
-  async findOne(id: number): Promise<CompanyOutput | Record<string, never>> {
-    return;
+  async findOne(id: string): Promise<Company> {
+    return this.repository.findById(id);
   }
 
-  async update(id: number, updateCompanyDto: UpdateCompanyDto): Promise<void> {
-    return Promise.resolve();
+  async update(
+    id: string,
+    updateCompanyDto: UpdateCompanyInput,
+  ): Promise<void> {
+    return this.repository.updateCompany(id, updateCompanyDto);
   }
 
   async remove(id: number): Promise<void> {
