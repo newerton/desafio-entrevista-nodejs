@@ -3,41 +3,49 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
 } from '@nestjs/common';
 
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { CreateVehicleInput } from './dto/create-vehicle.dto';
+import { UpdateVehicleInput } from './dto/update-vehicle.dto';
 import { VehicleService } from './vehicle.service';
 
-@Controller('vehicle')
+@Controller('vehicles')
 export class VehicleController {
-  constructor(private readonly vehicleService: VehicleService) {}
+  constructor(private readonly service: VehicleService) {}
 
   @Post()
-  create(@Body() createVehicleDto: CreateVehicleDto) {
-    return this.vehicleService.create(createVehicleDto);
+  create(@Body() createVehicleDto: CreateVehicleInput): Promise<void> {
+    return this.service.create(createVehicleDto);
   }
 
   @Get()
   findAll() {
-    return this.vehicleService.findAll();
+    return this.service.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.vehicleService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
-    return this.vehicleService.update(+id, updateVehicleDto);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  update(
+    @Param('id') id: string,
+    @Body() updateVehicleDto: UpdateVehicleInput,
+  ): Promise<void> {
+    return this.service.update(id, updateVehicleDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.vehicleService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: string): Promise<void> {
+    return this.service.remove(id);
   }
 }

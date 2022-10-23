@@ -1,27 +1,34 @@
 import { Injectable } from '@nestjs/common';
 
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { CreateVehicleInput } from './dto/create-vehicle.dto';
+import { UpdateVehicleInput } from './dto/update-vehicle.dto';
+import { Vehicle } from './entities/vehicle.entity';
+import { VehicleRepository } from './vehicle.repository';
 
 @Injectable()
 export class VehicleService {
-  create(createVehicleDto: CreateVehicleDto) {
-    return 'This action adds a new vehicle';
+  constructor(private readonly repository: VehicleRepository) {}
+
+  async create(createVehicleDto: CreateVehicleInput): Promise<void> {
+    return this.repository.createVehicle(createVehicleDto);
   }
 
-  findAll() {
-    return `This action returns all vehicle`;
+  async findAll(): Promise<Vehicle[]> {
+    return this.repository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} vehicle`;
+  async findOne(id: string): Promise<Vehicle> {
+    return this.repository.findById(id);
   }
 
-  update(id: number, updateVehicleDto: UpdateVehicleDto) {
-    return `This action updates a #${id} vehicle`;
+  async update(
+    id: string,
+    updateVehicleDto: UpdateVehicleInput,
+  ): Promise<void> {
+    return this.repository.updateVehicle(id, updateVehicleDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vehicle`;
+  async remove(id: string): Promise<void> {
+    return this.repository.deleteVehicle(id);
   }
 }
