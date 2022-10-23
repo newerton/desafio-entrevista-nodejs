@@ -1,6 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DataSource, DeleteResult } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { AppModule } from './../../app.module';
 
