@@ -11,7 +11,7 @@ import {
 } from '@common/helpers/test-helpers';
 import { validateUUIDV4 } from '@common/utils/validate-uuid-v4';
 
-import { CompanyFakeBuilder } from '../company-fake-builder';
+import { CompanyFakeBuilder } from '../fake-builder/company-fake-builder';
 
 describe('Company - /companies (e2e)', () => {
   let app: INestApplication;
@@ -118,7 +118,7 @@ describe('Company - /companies (e2e)', () => {
     });
   });
 
-  it(`/PATCH companies (UnprocessableEntityException: Company already registered)`, async () => {
+  it(`/PATCH companies`, async () => {
     const payload = CompanyFakeBuilder.aCompany()
       .withEmail('company@company.com')
       .build();
@@ -180,7 +180,43 @@ describe('Company - /companies (e2e)', () => {
       .send({ social_name: `${faker.company.name()} UPDATED` })
       .expect(HttpStatus.NOT_FOUND);
 
-    await expect(response.body).toStrictEqual({
+    expect(response.body).toStrictEqual({
+      statusCode: HttpStatus.NOT_FOUND,
+      message: 'Company not found',
+      error: 'Not Found',
+    });
+  });
+
+  it(`/DELETE companies`, async () => {
+    const payload = CompanyFakeBuilder.aCompany()
+      .withEmail('company@company.com')
+      .build();
+
+    await request(app.getHttpServer())
+      .post('/companies')
+      .send(payload)
+      .expect(HttpStatus.CREATED);
+
+    const response = await request(app.getHttpServer())
+      .get('/companies')
+      .send(payload)
+      .expect(HttpStatus.OK);
+
+    const { id } = response.body[0];
+
+    const deletedCompany = await request(app.getHttpServer())
+      .delete(`/companies/${id}`)
+      .expect(HttpStatus.NO_CONTENT);
+
+    expect(deletedCompany.body).toEqual({});
+  });
+
+  it(`/DELETE companies (NotFoundException: Company not found)`, async () => {
+    const response = await request(app.getHttpServer())
+      .delete(`/companies/${faker.datatype.uuid()}`)
+      .expect(HttpStatus.NOT_FOUND);
+
+    expect(response.body).toStrictEqual({
       statusCode: HttpStatus.NOT_FOUND,
       message: 'Company not found',
       error: 'Not Found',
