@@ -2,6 +2,7 @@ import { faker as Faker } from '@faker-js/faker';
 import { cnpj } from 'cpf-cnpj-validator';
 
 import { Company } from '@app/company/entities/company.entity';
+import { CompanyAddress } from '@app/company/entities/company_address.entity';
 
 type PropOrFactory<T> = T | ((index: number) => T);
 
@@ -15,6 +16,7 @@ export class CompanyFakerBuilder<TBuild = any> {
     this.faker.internet.password();
   private _document: PropOrFactory<string> = () => cnpj.generate();
   private _phone: PropOrFactory<string> = () => '(11) 9 9876-5432';
+  private _address = null;
   private _is_active: PropOrFactory<boolean> = () => true;
 
   private countObjs;
@@ -159,6 +161,12 @@ export class CompanyFakerBuilder<TBuild = any> {
     return this;
   }
 
+  // address
+  withAddress(valueOrFactory: PropOrFactory<CompanyAddress>) {
+    this._address = valueOrFactory;
+    return this;
+  }
+
   activate() {
     this._is_active = true;
     return this;
@@ -188,6 +196,7 @@ export class CompanyFakerBuilder<TBuild = any> {
       document: this.callFactory(this._document, index),
       phone: this.callFactory(this._phone, index),
       is_active: this.callFactory(this._is_active, index),
+      address: this.callFactory(this._address, index),
     }));
     return this.countObjs === 1 ? (array[0] as any) : array;
   }
