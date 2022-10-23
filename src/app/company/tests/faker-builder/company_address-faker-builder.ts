@@ -22,11 +22,11 @@ export class CompanyAddressFakerBuilder<TBuild = any> {
     this.faker = Faker;
   }
 
-  static aCompanyAddress() {
+  static aAddress() {
     return new CompanyAddressFakerBuilder<CompanyAddress>();
   }
 
-  static theCompanyAddresses(countObjs: number) {
+  static theAddresses(countObjs: number) {
     return new CompanyAddressFakerBuilder<CompanyAddress[]>(countObjs);
   }
 

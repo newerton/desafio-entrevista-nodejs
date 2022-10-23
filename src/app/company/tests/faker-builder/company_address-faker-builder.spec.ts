@@ -4,7 +4,7 @@ import { CompanyAddressFakerBuilder } from './company_address-faker-builder';
 
 describe('CompanyAddressFakerBuilder Unit Tests', () => {
   describe('id prop', () => {
-    const faker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const faker = CompanyAddressFakerBuilder.aAddress();
 
     it('should throw error when any with methods has called', () => {
       expect(() => faker['getValue']('id')).toThrow(
@@ -14,7 +14,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   describe('zipcode prop', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     it('should be a function', () => {
       expect(
         typeof companyAddressFaker['_zipcode'] === 'function',
@@ -46,7 +46,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
       const company = companyAddressFaker.build();
       expect(company.zipcode).toBe(`test zipcode 0`);
 
-      const fakerMany = CompanyAddressFakerBuilder.theCompanyAddresses(2);
+      const fakerMany = CompanyAddressFakerBuilder.theAddresses(2);
       fakerMany.withZipcode((index) => `test zipcode ${index}`);
       const address = fakerMany.build();
 
@@ -89,7 +89,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   describe('street prop', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     it('should be a function', () => {
       expect(typeof companyAddressFaker['_street'] === 'function').toBeTruthy();
     });
@@ -119,7 +119,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
       const company = companyAddressFaker.build();
       expect(company.street).toBe(`test street 0`);
 
-      const fakerMany = CompanyAddressFakerBuilder.theCompanyAddresses(2);
+      const fakerMany = CompanyAddressFakerBuilder.theAddresses(2);
       fakerMany.withStreet((index) => `test street ${index}`);
       const address = fakerMany.build();
 
@@ -162,7 +162,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   describe('number prop', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     it('should be a function', () => {
       expect(typeof companyAddressFaker['_number'] === 'function').toBeTruthy();
     });
@@ -192,7 +192,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
       const company = companyAddressFaker.build();
       expect(company.number).toBe(`test number 0`);
 
-      const fakerMany = CompanyAddressFakerBuilder.theCompanyAddresses(2);
+      const fakerMany = CompanyAddressFakerBuilder.theAddresses(2);
       fakerMany.withNumber((index) => `test number ${index}`);
       const address = fakerMany.build();
 
@@ -235,7 +235,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   describe('neighborhood prop', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     it('should be a function', () => {
       expect(
         typeof companyAddressFaker['_neighborhood'] === 'function',
@@ -261,7 +261,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
       const company = companyAddressFaker.build();
       expect(company.neighborhood).toBe(`test neighborhood 0`);
 
-      const fakerMany = CompanyAddressFakerBuilder.theCompanyAddresses(2);
+      const fakerMany = CompanyAddressFakerBuilder.theAddresses(2);
       fakerMany.withNeighborhood((index) => `test neighborhood ${index}`);
       const address = fakerMany.build();
 
@@ -304,7 +304,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   describe('complement prop', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     it('should be a function', () => {
       expect(
         typeof companyAddressFaker['_complement'] === 'function',
@@ -328,7 +328,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
       const company = companyAddressFaker.build();
       expect(company.complement).toBe(`test complement 0`);
 
-      const fakerMany = CompanyAddressFakerBuilder.theCompanyAddresses(2);
+      const fakerMany = CompanyAddressFakerBuilder.theAddresses(2);
       fakerMany.withComplement((index) => `test complement ${index}`);
       const address = fakerMany.build();
 
@@ -371,7 +371,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   describe('state_id prop', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     it('should be a function', () => {
       expect(
         typeof companyAddressFaker['_state_id'] === 'function',
@@ -395,7 +395,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
       const company = companyAddressFaker.build();
       expect(company.state_id).toBe(0);
 
-      const fakerMany = CompanyAddressFakerBuilder.theCompanyAddresses(2);
+      const fakerMany = CompanyAddressFakerBuilder.theAddresses(2);
       fakerMany.withStateId((index) => index);
       const address = fakerMany.build();
 
@@ -427,7 +427,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   describe('city_id prop', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     it('should be a function', () => {
       expect(
         typeof companyAddressFaker['_city_id'] === 'function',
@@ -451,7 +451,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
       const company = companyAddressFaker.build();
       expect(company.city_id).toBe(0);
 
-      const fakerMany = CompanyAddressFakerBuilder.theCompanyAddresses(2);
+      const fakerMany = CompanyAddressFakerBuilder.theAddresses(2);
       fakerMany.withCityId((index) => index);
       const address = fakerMany.build();
 
@@ -483,7 +483,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   it('should create a company address', () => {
-    const companyAddressFaker = CompanyAddressFakerBuilder.aCompanyAddress();
+    const companyAddressFaker = CompanyAddressFakerBuilder.aAddress();
     let address = companyAddressFaker.build();
 
     expect(typeof address.zipcode === 'string').toBeTruthy();
@@ -514,8 +514,7 @@ describe('CompanyAddressFakerBuilder Unit Tests', () => {
   });
 
   it('should create many address', () => {
-    const companyAddressFaker =
-      CompanyAddressFakerBuilder.theCompanyAddresses(2);
+    const companyAddressFaker = CompanyAddressFakerBuilder.theAddresses(2);
     let addresses = companyAddressFaker.build();
 
     addresses.forEach((address) => {
