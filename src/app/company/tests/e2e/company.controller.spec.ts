@@ -12,6 +12,7 @@ import {
 import { validateUUIDV4 } from '@common/utils/validate-uuid-v4';
 
 import { CompanyFakerBuilder } from '../faker-builder/company-faker-builder';
+import { CompanyAddressFakerBuilder } from '../faker-builder/company_address-faker-builder';
 
 describe('Company - /companies (e2e)', () => {
   let app: INestApplication;
@@ -35,7 +36,7 @@ describe('Company - /companies (e2e)', () => {
     await app.close();
   });
 
-  it(`/GET companies`, async () => {
+  it(`/GET companies (empty result)`, async () => {
     const response = await request(app.getHttpServer())
       .get('/companies')
       .send()
@@ -44,18 +45,18 @@ describe('Company - /companies (e2e)', () => {
     expect(response.body).toEqual([]);
   });
 
-  it(`/GET 4 companies`, async () => {
-    const payload = CompanyFakerBuilder.theCompanies(4).build();
+  it(`/GET companies`, async () => {
+    const payload = CompanyFakerBuilder.aCompany().build();
     await repository.save(payload);
 
     const response = await request(app.getHttpServer())
       .get('/companies')
       .expect(HttpStatus.OK);
 
-    const lastCompanyPayload = payload[3];
+    const lastCompanyPayload = payload;
     const firstCompanyResponse = response.body[0];
 
-    expect(firstCompanyResponse.id).toEqual(lastCompanyPayload.id);
+    expect(validateUUIDV4(firstCompanyResponse.id)).toBeTruthy();
 
     expect(firstCompanyResponse.social_name).toEqual(
       lastCompanyPayload.social_name,
@@ -96,6 +97,38 @@ describe('Company - /companies (e2e)', () => {
     expect(response.body).toEqual({});
   });
 
+  it(`/POST companies (with address)`, async () => {
+    const address = CompanyAddressFakerBuilder.aAddress().build();
+
+    const company = CompanyFakerBuilder.aCompany()
+      .withEmail('company@company.com')
+      .withAddress(address)
+      .build();
+
+    await request(app.getHttpServer())
+      .post('/companies')
+      .send(company)
+      .expect(HttpStatus.CREATED);
+
+    const response = await request(app.getHttpServer())
+      .get('/companies')
+      .expect(HttpStatus.OK);
+
+    expect(validateUUIDV4(response.body[0].id)).toBeTruthy();
+    expect(response.body[0].social_name).toBeNull();
+    expect(response.body[0].fantasy_name).toEqual(company.fantasy_name);
+    expect(response.body[0].email).toEqual('company@company.com');
+    expect(response.body[0].document).toEqual(company.document);
+    expect(response.body[0].phone).toEqual(company.phone);
+    expect(response.body[0].is_active).toEqual(company.is_active);
+    expect(dayjs(response.body[0].created_at).isValid()).toBeTruthy();
+    expect(dayjs(response.body[0].updated_at).isValid()).toBeTruthy();
+
+    // Address
+    const companyAddress = response.body[0].address;
+    expect(companyAddress.zipcode).toEqual(address.zipcode);
+  });
+
   it(`/POST companies (UnprocessableEntityException: Company already registered)`, async () => {
     const payload = CompanyFakerBuilder.aCompany()
       .withEmail('company@company.com')
@@ -111,7 +144,7 @@ describe('Company - /companies (e2e)', () => {
       .send(payload)
       .expect(HttpStatus.UNPROCESSABLE_ENTITY);
 
-    await expect(response.body).toStrictEqual({
+    expect(response.body).toStrictEqual({
       statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       message: 'Company already registered',
       error: 'Unprocessable Entity',
