@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 import { VehicleFakerBuilder } from './vehicle-faker-builder';
 
-describe('CompanyFakerrBuilder Unit Tests', () => {
+describe('VehicleFakerBuilder Unit Tests', () => {
   describe('id prop', () => {
     const faker = VehicleFakerBuilder.aVehicle();
 

@@ -3,7 +3,7 @@ import { cnpj } from 'cpf-cnpj-validator';
 
 import { CompanyFakerBuilder } from './company-faker-builder';
 
-describe('CompanyFakerrBuilder Unit Tests', () => {
+describe('CompanyFakerBuilder Unit Tests', () => {
   describe('id prop', () => {
     const faker = CompanyFakerBuilder.aCompany();
 
