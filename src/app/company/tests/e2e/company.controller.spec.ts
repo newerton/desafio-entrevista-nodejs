@@ -1,4 +1,8 @@
-import { INestApplication } from '@nestjs/common';
+import {
+  HttpStatus,
+  INestApplication,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 
@@ -7,6 +11,7 @@ import {
   clearRepositories,
   createNestApplication,
 } from '@common/helpers/test-helpers';
+import { uuidValidateV4 } from '@common/utils/validate-uuid-v4';
 
 import { CompanyFakeBuilder } from '../company-fake-builder';
 
@@ -36,7 +41,7 @@ describe('Company - /companies (e2e)', () => {
     const response = await request(app.getHttpServer())
       .get('/companies')
       .send()
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     expect(response.body).toEqual([]);
   });
@@ -47,12 +52,11 @@ describe('Company - /companies (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .get('/companies')
-      .expect(200);
+      .expect(HttpStatus.OK);
 
     const lastCompanyPayload = payload[3];
     const firstCompanyResponse = response.body[0];
 
-    console.log(lastCompanyPayload, firstCompanyResponse);
     expect(firstCompanyResponse.id).toEqual(lastCompanyPayload.id);
 
     expect(firstCompanyResponse.social_name).toEqual(
@@ -79,5 +83,40 @@ describe('Company - /companies (e2e)', () => {
 
     expect(firstCompanyResponse.password).toBe(undefined);
     expect(firstCompanyResponse.deleted_at).toBe(undefined);
+  });
+
+  it(`/POST companies`, async () => {
+    const payload = CompanyFakeBuilder.aCompany()
+      .withEmail('company@company.com')
+      .build();
+
+    const response = await request(app.getHttpServer())
+      .post('/companies')
+      .send(payload)
+      .expect(HttpStatus.CREATED);
+
+    expect(response.body).toEqual({});
+  });
+
+  it(`/POST companies (UnprocessableEntityException: Company already registered)`, async () => {
+    const payload = CompanyFakeBuilder.aCompany()
+      .withEmail('company@company.com')
+      .build();
+
+    await request(app.getHttpServer())
+      .post('/companies')
+      .send(payload)
+      .expect(HttpStatus.CREATED);
+
+    const response = await request(app.getHttpServer())
+      .post('/companies')
+      .send(payload)
+      .expect(HttpStatus.UNPROCESSABLE_ENTITY);
+
+    await expect(response.body).toStrictEqual({
+      statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      message: 'Company already registered',
+      error: 'Unprocessable Entity',
+    });
   });
 });
