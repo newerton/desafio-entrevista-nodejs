@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateResult } from 'typeorm';
 
 import { CompanyRepository } from './company.repository';
 import { CreateCompanyInput } from './dto/create-company.dto';

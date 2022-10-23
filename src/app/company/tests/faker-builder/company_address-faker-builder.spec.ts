@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { cnpj } from 'cpf-cnpj-validator';
 
 import { CompanyAddressFakerBuilder } from './company_address-faker-builder';
 
