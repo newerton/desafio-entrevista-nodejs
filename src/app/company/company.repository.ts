@@ -4,7 +4,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, UpdateResult } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CreateCompanyInput } from './dto/create-company.dto';
@@ -59,15 +59,14 @@ export class CompanyRepository extends Repository<Company> {
   }
 
   async findById(id: string): Promise<Company> {
-    return this.findOneBy({ id });
-  }
-
-  async updateCompany(id: string, updateCompanyDto: UpdateCompanyInput) {
-    const model = await this.findOne({
+    return this.findOne({
       where: { id },
       relations: ['address'],
     });
+  }
 
+  async updateCompany(id: string, updateCompanyDto: UpdateCompanyInput) {
+    const model = await this.findById(id);
     if (!model) {
       throw new NotFoundException('Company not found');
     }
@@ -86,5 +85,13 @@ export class CompanyRepository extends Repository<Company> {
     };
 
     await this.save(newPayload);
+  }
+
+  async deleteCompany(id: string): Promise<void> {
+    const model = await this.findById(id);
+    if (!model) {
+      throw new NotFoundException('Company not found');
+    }
+    this.softDelete(id);
   }
 }

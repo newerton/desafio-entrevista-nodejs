@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UpdateResult } from 'typeorm';
 
 import { CompanyRepository } from './company.repository';
 import { CreateCompanyInput } from './dto/create-company.dto';
@@ -27,7 +28,7 @@ export class CompanyService {
     return this.repository.updateCompany(id, updateCompanyDto);
   }
 
-  async remove(id: number): Promise<void> {
-    return Promise.resolve();
+  async remove(id: string): Promise<void> {
+    return this.repository.deleteCompany(id);
   }
 }

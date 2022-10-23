@@ -4,12 +4,15 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { CompanyModule } from '@app/company/company.module';
 import { CompanyService } from '@app/company/company.service';
 import { CreateCompanyInput } from '@app/company/dto/create-company.dto';
 import { Company } from '@app/company/entities/company.entity';
+import { databaseConfig } from '@common/config/database';
 
-import { CompanyFakeBuilder } from '../company-fake-builder';
+import { CompanyFakeBuilder } from '../fake-builder/company-fake-builder';
 
 export const throwNotFoundException = (message?: string): never => {
   throw new NotFoundException(message);
@@ -34,7 +37,10 @@ describe('CompanyService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CompanyService],
+      imports: [
+        TypeOrmModule.forRoot({ ...databaseConfig, synchronize: false }),
+        CompanyModule,
+      ],
     }).compile();
 
     service = module.get<CompanyService>(CompanyService);
@@ -63,7 +69,7 @@ describe('CompanyService', () => {
       const result: Company = CompanyFakeBuilder.aCompany().build();
       jest.spyOn(service, 'findOne').mockImplementation(async () => result);
 
-      expect(await service.findOne(11)).toBe(result);
+      expect(await service.findOne('1')).toBe(result);
     });
 
     it('should throw NotFoundException if company not found', async () => {
@@ -74,7 +80,7 @@ describe('CompanyService', () => {
         );
 
       try {
-        await service.findOne(999);
+        await service.findOne('999');
       } catch (e) {
         expect(e).toBeInstanceOf(NotFoundException);
         expect(e.message).toBe('Company not found');
@@ -110,7 +116,7 @@ describe('CompanyService', () => {
     it('should return an empty response', async () => {
       const request = mockCreateRequest();
       jest.spyOn(service, 'update').mockImplementation(async () => undefined);
-      expect(await service.update(1, request)).toBe(undefined);
+      expect(await service.update('1', request)).toBe(undefined);
     });
 
     it('should throw NotFoundException if company not found', async () => {
@@ -122,7 +128,7 @@ describe('CompanyService', () => {
         );
 
       try {
-        await service.update(1, request);
+        await service.update('1', request);
       } catch (e) {
         expect(e).toBeInstanceOf(NotFoundException);
         expect(e.message).toBe('Company not found');
@@ -133,7 +139,7 @@ describe('CompanyService', () => {
   describe('remove', () => {
     it('should return an empty response', async () => {
       jest.spyOn(service, 'remove').mockImplementation(async () => undefined);
-      expect(await service.remove(1)).toBe(undefined);
+      expect(await service.remove('1')).toBe(undefined);
     });
 
     it('should throw NotFoundException if company not found', async () => {
@@ -144,7 +150,7 @@ describe('CompanyService', () => {
         );
 
       try {
-        await service.remove(1);
+        await service.remove('1');
       } catch (e) {
         expect(e).toBeInstanceOf(NotFoundException);
         expect(e.message).toBe('Company not found');

@@ -32,5 +32,3 @@ export class CreateCompanyInput {
   @ApiProperty({ example: {} })
   readonly address?: CompanyAddress;
 }
-
-export class CreateCompanyOutput {}

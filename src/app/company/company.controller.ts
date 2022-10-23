@@ -39,12 +39,13 @@ export class CompanyController {
   update(
     @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyInput,
-  ) {
+  ): Promise<void> {
     return this.service.update(id, updateCompanyDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: string): Promise<void> {
+    return this.service.remove(id);
   }
 }

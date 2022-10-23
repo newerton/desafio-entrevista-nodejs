@@ -4,13 +4,16 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CompanyController } from '@app/company/company.controller';
+import { CompanyModule } from '@app/company/company.module';
 import { CompanyService } from '@app/company/company.service';
 import { CreateCompanyInput } from '@app/company/dto/create-company.dto';
 import { Company } from '@app/company/entities/company.entity';
+import { databaseConfig } from '@common/config/database';
 
-import { CompanyFakeBuilder } from '../company-fake-builder';
+import { CompanyFakeBuilder } from '../fake-builder/company-fake-builder';
 
 export const throwNotFoundException = (message?: string): never => {
   throw new NotFoundException(message);
@@ -36,8 +39,10 @@ describe('CompanyController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [CompanyController],
-      providers: [CompanyService],
+      imports: [
+        TypeOrmModule.forRoot({ ...databaseConfig, synchronize: false }),
+        CompanyModule,
+      ],
     }).compile();
 
     controller = module.get<CompanyController>(CompanyController);
