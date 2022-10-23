@@ -50,5 +50,5 @@ export class Company extends BaseEntity {
     cascade: true,
   })
   @JoinTable()
-  address?: Relation<CompanyAddress>;
+  address: Relation<CompanyAddress>;
 }

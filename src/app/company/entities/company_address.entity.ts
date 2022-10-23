@@ -39,6 +39,6 @@ export class CompanyAddress extends BaseEntity {
   city_id: number;
 
   @OneToOne(() => Company, (company) => company.address)
-  @JoinColumn({ name: 'company_id' })
+  @JoinColumn({ name: 'company_id', referencedColumnName: 'id' })
   company: Relation<Company>;
 }
