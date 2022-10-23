@@ -13,7 +13,7 @@ import { CreateCompanyInput } from '@app/company/dto/create-company.dto';
 import { Company } from '@app/company/entities/company.entity';
 import { databaseConfig } from '@common/config/database';
 
-import { CompanyFakeBuilder } from '../fake-builder/company-fake-builder';
+import { CompanyFakerBuilder } from '../faker-builder/company-faker-builder';
 
 export const throwNotFoundException = (message?: string): never => {
   throw new NotFoundException(message);
@@ -56,7 +56,7 @@ describe('CompanyController', () => {
 
   describe('findAll', () => {
     it('should return an array of companies', async () => {
-      const result: Company[] = CompanyFakeBuilder.theCompanies(2).build();
+      const result: Company[] = CompanyFakerBuilder.theCompanies(2).build();
       jest.spyOn(service, 'findAll').mockImplementation(async () => result);
 
       expect(await controller.findAll()).toBe(result);
@@ -72,7 +72,7 @@ describe('CompanyController', () => {
 
   describe('findOne', () => {
     it('should return a object of company', async () => {
-      const result: Company = CompanyFakeBuilder.aCompany().build();
+      const result: Company = CompanyFakerBuilder.aCompany().build();
       jest.spyOn(service, 'findOne').mockImplementation(async () => result);
 
       expect(await controller.findOne('valid_uuid')).toBe(result);

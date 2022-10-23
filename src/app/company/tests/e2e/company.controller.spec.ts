@@ -11,7 +11,7 @@ import {
 } from '@common/helpers/test-helpers';
 import { validateUUIDV4 } from '@common/utils/validate-uuid-v4';
 
-import { CompanyFakeBuilder } from '../fake-builder/company-fake-builder';
+import { CompanyFakerBuilder } from '../faker-builder/company-faker-builder';
 
 describe('Company - /companies (e2e)', () => {
   let app: INestApplication;
@@ -45,7 +45,7 @@ describe('Company - /companies (e2e)', () => {
   });
 
   it(`/GET 4 companies`, async () => {
-    const payload = CompanyFakeBuilder.theCompanies(4).build();
+    const payload = CompanyFakerBuilder.theCompanies(4).build();
     await repository.save(payload);
 
     const response = await request(app.getHttpServer())
@@ -84,7 +84,7 @@ describe('Company - /companies (e2e)', () => {
   });
 
   it(`/POST companies`, async () => {
-    const payload = CompanyFakeBuilder.aCompany()
+    const payload = CompanyFakerBuilder.aCompany()
       .withEmail('company@company.com')
       .build();
 
@@ -97,7 +97,7 @@ describe('Company - /companies (e2e)', () => {
   });
 
   it(`/POST companies (UnprocessableEntityException: Company already registered)`, async () => {
-    const payload = CompanyFakeBuilder.aCompany()
+    const payload = CompanyFakerBuilder.aCompany()
       .withEmail('company@company.com')
       .build();
 
@@ -119,7 +119,7 @@ describe('Company - /companies (e2e)', () => {
   });
 
   it(`/PATCH companies`, async () => {
-    const payload = CompanyFakeBuilder.aCompany()
+    const payload = CompanyFakerBuilder.aCompany()
       .withEmail('company@company.com')
       .build();
 
@@ -188,7 +188,7 @@ describe('Company - /companies (e2e)', () => {
   });
 
   it(`/DELETE companies`, async () => {
-    const payload = CompanyFakeBuilder.aCompany()
+    const payload = CompanyFakerBuilder.aCompany()
       .withEmail('company@company.com')
       .build();
 
