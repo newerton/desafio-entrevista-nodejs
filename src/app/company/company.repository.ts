@@ -46,12 +46,13 @@ export class CompanyRepository extends Repository<Company> {
       document,
       phone,
       is_active,
-      ...(address || {}),
+      address,
     });
   }
 
   async findAll() {
     return this.find({
+      relations: ['address'],
       order: {
         created_at: 'DESC',
       },
