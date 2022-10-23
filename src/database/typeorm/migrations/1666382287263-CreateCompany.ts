@@ -19,6 +19,8 @@ export class CreateCompany1666382287263 implements MigrationInterface {
           {
             name: 'social_name',
             type: 'varchar',
+            default: null,
+            isNullable: true,
           },
           {
             name: 'fantasy_name',
