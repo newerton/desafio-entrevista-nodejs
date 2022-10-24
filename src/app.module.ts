@@ -8,6 +8,7 @@ import { AuthModule } from '@app/auth/auth.module';
 import { CompanyModule } from '@app/company/company.module';
 import { CompanyVacancyModule } from '@app/company_vacancy/company_vacancy.module';
 import { IbgeModule } from '@app/ibge/ibge.module';
+import { ReportModule } from '@app/report/report.module';
 import { VacancyModule } from '@app/vacancy/vacancy.module';
 import { VehicleModule } from '@app/vehicle/vehicle.module';
 import { VehicleTypeModule } from '@app/vehicle_type/vehicle_type.module';
@@ -37,6 +38,7 @@ import { databaseConfig } from '@common/config/database';
     VehicleModule,
     VehicleTypeModule,
     IbgeModule,
+    ReportModule,
   ],
   providers: [
     {
