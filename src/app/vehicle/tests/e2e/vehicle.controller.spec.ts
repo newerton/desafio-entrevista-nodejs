@@ -56,7 +56,6 @@ describe('Vehicle - /vehicles (e2e)', () => {
     const firstVehicleResponse = response.body[0];
 
     expect(validateUUIDV4(firstVehicleResponse.id)).toBeTruthy();
-
     expect(firstVehicleResponse.type).toEqual(lastVehiclePayload.type);
     expect(firstVehicleResponse.brand).toEqual(lastVehiclePayload.brand);
     expect(firstVehicleResponse.model).toEqual(lastVehiclePayload.model);
@@ -78,6 +77,9 @@ describe('Vehicle - /vehicles (e2e)', () => {
     );
 
     expect(firstVehicleResponse.deleted_at).toBe(undefined);
+
+    const short_name = `${lastVehiclePayload.brand} ${lastVehiclePayload.model} (${lastVehiclePayload.color}) - ${lastVehiclePayload.license_plate}`;
+    expect(firstVehicleResponse.short_name).toEqual(short_name);
   });
 
   it(`/POST vehicles`, async () => {

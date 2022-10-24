@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity } from 'typeorm';
+import { AfterLoad, Column, Entity } from 'typeorm';
 
 import { BaseEntity } from '@common/entity';
 
@@ -32,4 +32,11 @@ export class Vehicle extends BaseEntity {
   @ApiProperty()
   @Column({ default: true })
   is_active?: boolean;
+
+  short_name: string;
+
+  @AfterLoad()
+  generateShortName(): void {
+    this.short_name = `${this.brand} ${this.model} (${this.color}) - ${this.license_plate}`;
+  }
 }
