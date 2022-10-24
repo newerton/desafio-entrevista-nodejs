@@ -84,6 +84,7 @@ export class VacancyRepository extends Repository<Vacancy> {
 
   async findById(id: string): Promise<Vacancy> {
     return this.findOne({
+      relations: ['company', 'vehicle'],
       where: { id },
     });
   }
