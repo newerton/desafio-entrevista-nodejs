@@ -2,6 +2,9 @@ import { faker } from '@faker-js/faker';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVehicleInput {
+  @ApiProperty({ example: '' })
+  readonly vehicle_type_id: string;
+
   @ApiProperty({ example: 'Passeio' })
   readonly type: string;
 

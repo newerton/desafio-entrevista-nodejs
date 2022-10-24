@@ -21,6 +21,7 @@ export class VehicleRepository extends Repository<Vehicle> {
 
   async createVehicle(createVehicleDto: CreateVehicleInput): Promise<void> {
     const {
+      vehicle_type_id,
       type,
       brand,
       model,
@@ -37,6 +38,7 @@ export class VehicleRepository extends Repository<Vehicle> {
 
     await this.save({
       id: uuidv4(),
+      vehicle_type_id,
       type,
       brand,
       model,
@@ -68,6 +70,7 @@ export class VehicleRepository extends Repository<Vehicle> {
     }
 
     const {
+      vehicle_type_id,
       type,
       brand,
       model,
@@ -78,6 +81,7 @@ export class VehicleRepository extends Repository<Vehicle> {
     } = updateVehicleDto;
 
     const newPayload = {
+      vehicle_type_id,
       id,
       type,
       brand,

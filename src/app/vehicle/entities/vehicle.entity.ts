@@ -1,10 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AfterLoad, Column, Entity } from 'typeorm';
+import {
+  AfterLoad,
+  Column,
+  Entity,
+  JoinTable,
+  OneToOne,
+  Relation,
+} from 'typeorm';
 
+import { VehicleType } from '@app/vehicle_type/entities/vehicle_type.entity';
 import { BaseEntity } from '@common/entity';
 
 @Entity('vehicle')
 export class Vehicle extends BaseEntity {
+  @ApiProperty()
+  @Column('uuid')
+  vehicle_type_id: string;
+
   @ApiProperty()
   @Column()
   type: string;
@@ -39,4 +51,9 @@ export class Vehicle extends BaseEntity {
   generateShortName(): void {
     this.short_name = `${this.brand} ${this.model} (${this.color}) - ${this.license_plate}`;
   }
+
+  @ApiProperty()
+  @OneToOne(() => VehicleType, (vehicleType) => vehicleType.vehicle)
+  @JoinTable()
+  vehicleType: Relation<VehicleType>;
 }
