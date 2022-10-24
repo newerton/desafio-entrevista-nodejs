@@ -58,7 +58,6 @@ export class ReportRepository extends Repository<Vacancy> {
       where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''
     } ${groupBy}`;
 
-    console.log({ querySQL });
     return querySQL;
   }
 }
