@@ -39,6 +39,7 @@ export class VacancyRepository extends Repository<Vacancy> {
 
   async findAll() {
     return this.find({
+      relations: ['company', 'vehicle'],
       order: {
         created_at: 'DESC',
       },
