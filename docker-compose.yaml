@@ -1,6 +1,44 @@
 version: '3'
 
 services:
+  nginx:
+    image: nginx:1.17-alpine
+    container_name: parking-nginx
+    restart: always
+    ports:
+      - '8080:80'
+      - '4434:443'
+    volumes:
+      - web-root:/var/www/html
+      - ./.docker/development/nginx:/etc/nginx/conf.d
+      - ./.docker/development/certs:/etc/ssl/certs
+    logging:
+      options:
+        max-size: '15m'
+        max-file: '1'
+    networks:
+      - default
+    depends_on:
+      - app
+
+  app:
+    build: .
+    container_name: parking-nodejs
+    entrypoint: ./.docker/entrypoint.sh
+    restart: always
+    tty: true
+    volumes:
+      - /home/node/app/node_modules
+      - .:/home/node/app
+    logging:
+      options:
+        max-size: '5m'
+        max-file: '1'
+    networks:
+      - default
+    depends_on:
+      - db
+
   db:
     image: mysql:8
     container_name: parking-db
@@ -17,6 +55,9 @@ services:
     networks:
       - default
 
+volumes:
+  web-root:
+    driver: local
 networks:
   default:
     driver: bridge
