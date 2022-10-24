@@ -11,5 +11,6 @@ import { CompanyAddress } from './entities/company_address.entity';
   imports: [TypeOrmModule.forFeature([Company, CompanyAddress])],
   controllers: [CompanyController],
   providers: [CompanyService, CompanyRepository],
+  exports: [CompanyService],
 })
 export class CompanyModule {}
