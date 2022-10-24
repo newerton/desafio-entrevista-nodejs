@@ -86,7 +86,7 @@ export class CreateVacancy1666573409642 implements MigrationInterface {
     await queryRunner.createIndex(
       'vacancy',
       new TableIndex({
-        name: 'fk-vacancy-company_id',
+        name: 'idx-vacancy-company_id',
         columnNames: ['company_id'],
         parser: 'btree',
       }),
@@ -95,7 +95,7 @@ export class CreateVacancy1666573409642 implements MigrationInterface {
     await queryRunner.createIndex(
       'vacancy',
       new TableIndex({
-        name: 'fk-vacancy-vehicle_id',
+        name: 'idx-vacancy-vehicle_id',
         columnNames: ['vehicle_id'],
         parser: 'btree',
       }),
