@@ -4,11 +4,9 @@
 
 cd /home/node/app/
 if [ ! -f ".env" ]; then
-    cp .env.example .env
+    cp .env.docker .env
 fi
 
-npm install
-
-npm run build
+npm run typeorm migration:run -- -d ./dist/src/common/config/database.js
 
 node ./dist/src/main.js
