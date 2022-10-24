@@ -5,6 +5,7 @@ import { Vehicle } from '@app/vehicle/entities/vehicle.entity';
 type PropOrFactory<T> = T | ((index: number) => T);
 
 export class VehicleFakerBuilder<TBuild = any> {
+  private _vehicle_type_id = undefined;
   private _type: PropOrFactory<string> = () => 'Utilitário';
   private _brand: PropOrFactory<string> = () =>
     this.faker.vehicle.manufacturer();
@@ -29,6 +30,27 @@ export class VehicleFakerBuilder<TBuild = any> {
 
   static theVehicles(countObjs: number) {
     return new VehicleFakerBuilder<Vehicle[]>(countObjs);
+  }
+
+  // type
+  withVehicleTypeId(valueOrFactory: PropOrFactory<string>) {
+    this._vehicle_type_id = valueOrFactory;
+    return this;
+  }
+
+  withInvalidVehicleTypeIdEmpty(value: '' | null | undefined) {
+    this._vehicle_type_id = value;
+    return this;
+  }
+
+  withInvalidVehicleTypeIdNotAString(value?: any) {
+    this._vehicle_type_id = value ?? 5;
+    return this;
+  }
+
+  withInvalidVehicleTypeIdTooLong(value?: string) {
+    this._vehicle_type_id = value ?? this.faker.datatype.string(256);
+    return this;
   }
 
   // type
@@ -179,6 +201,7 @@ export class VehicleFakerBuilder<TBuild = any> {
 
   build(): TBuild {
     const array = new Array(this.countObjs).fill(undefined).map((_, index) => ({
+      vehicle_type_id: this.callFactory(this._vehicle_type_id, index),
       type: this.callFactory(this._type, index),
       brand: this.callFactory(this._brand, index),
       model: this.callFactory(this._model, index),
@@ -190,6 +213,9 @@ export class VehicleFakerBuilder<TBuild = any> {
     return this.countObjs === 1 ? (array[0] as any) : array;
   }
 
+  get vehicle_type_id() {
+    return this.getValue('vehicle_type_id');
+  }
   get type() {
     return this.getValue('type');
   }

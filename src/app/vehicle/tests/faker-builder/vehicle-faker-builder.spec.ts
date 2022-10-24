@@ -13,6 +13,74 @@ describe('VehicleFakerBuilder Unit Tests', () => {
     });
   });
 
+  describe('vehicle_type_id prop', () => {
+    const vehicleFaker = VehicleFakerBuilder.aVehicle();
+    it('should be a function', () => {
+      expect(
+        typeof vehicleFaker['_vehicle_type_id'] === 'undefined',
+      ).toBeTruthy();
+    });
+
+    test('withVehicleTypeId', () => {
+      const $this = vehicleFaker.withVehicleTypeId('test vehicle_type_id');
+      expect($this).toBeInstanceOf(VehicleFakerBuilder);
+      expect(vehicleFaker['_vehicle_type_id']).toBe('test vehicle_type_id');
+
+      vehicleFaker.withVehicleTypeId(() => 'test vehicle_type_id');
+      expect(vehicleFaker['_vehicle_type_id']()).toBe('test vehicle_type_id');
+
+      expect(vehicleFaker.vehicle_type_id).toBe('test vehicle_type_id');
+    });
+
+    it('should pass index to vehicle_type_id factory', () => {
+      vehicleFaker.withVehicleTypeId(
+        (index) => `test vehicle_type_id ${index}`,
+      );
+      const vehicle = vehicleFaker.build();
+      expect(vehicle.vehicle_type_id).toBe(`test vehicle_type_id 0`);
+
+      const fakerMany = VehicleFakerBuilder.theVehicles(2);
+      fakerMany.withVehicleTypeId((index) => `test vehicle_type_id ${index}`);
+      const vehicles = fakerMany.build();
+
+      expect(vehicles[0].vehicle_type_id).toBe(`test vehicle_type_id 0`);
+      expect(vehicles[1].vehicle_type_id).toBe(`test vehicle_type_id 1`);
+    });
+
+    test('invalid empty case', () => {
+      const $this = vehicleFaker.withInvalidVehicleTypeIdEmpty(undefined);
+      expect($this).toBeInstanceOf(VehicleFakerBuilder);
+      expect(vehicleFaker['_vehicle_type_id']).toBeUndefined();
+
+      vehicleFaker.withInvalidVehicleTypeIdEmpty(null);
+      expect(vehicleFaker['_vehicle_type_id']).toBeNull();
+
+      vehicleFaker.withInvalidVehicleTypeIdEmpty('');
+      expect(vehicleFaker['_vehicle_type_id']).toBe('');
+    });
+
+    test('invalid too long case', () => {
+      const $this = vehicleFaker.withInvalidVehicleTypeIdTooLong();
+      expect($this).toBeInstanceOf(VehicleFakerBuilder);
+      expect(vehicleFaker['_vehicle_type_id'].length).toBe(256);
+
+      const tooLong = 'a'.repeat(256);
+      vehicleFaker.withInvalidVehicleTypeIdTooLong(tooLong);
+      expect(vehicleFaker['_vehicle_type_id'].length).toBe(256);
+      expect(vehicleFaker['_vehicle_type_id']).toBe(tooLong);
+    });
+
+    test('invalid not a string case', () => {
+      const $this = vehicleFaker.withInvalidVehicleTypeIdNotAString();
+      expect($this).toBeInstanceOf(VehicleFakerBuilder);
+      expect(vehicleFaker['_vehicle_type_id']).toEqual(5);
+
+      const notAString = 123;
+      vehicleFaker.withInvalidVehicleTypeIdNotAString(notAString);
+      expect(vehicleFaker['_vehicle_type_id']).toBe(notAString);
+    });
+  });
+
   describe('type prop', () => {
     const vehicleFaker = VehicleFakerBuilder.aVehicle();
     it('should be a function', () => {

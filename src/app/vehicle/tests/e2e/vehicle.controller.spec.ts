@@ -9,6 +9,7 @@ import { AuthService } from '@app/auth/auth.service';
 import { Company } from '@app/company/entities/company.entity';
 import { CompanyFakerBuilder } from '@app/company/tests/faker-builder/company-faker-builder';
 import { VehicleRepository } from '@app/vehicle/vehicle.repository';
+import { VehicleType } from '@app/vehicle_type/entities/vehicle_type.entity';
 import {
   clearRepositories,
   createNestApplication,
@@ -23,6 +24,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
   let repository: VehicleRepository;
   let authService: AuthService;
   let accessToken: string;
+  let vehicleType: VehicleType;
 
   beforeAll(async () => {
     app = await createNestApplication({
@@ -42,6 +44,11 @@ describe('Vehicle - /vehicles (e2e)', () => {
       .withPassword(password)
       .build();
     await dbConnection.manager.save(Company, companyPayload);
+
+    vehicleType = await dbConnection.manager.save(VehicleType, {
+      name: 'Car',
+      is_active: true,
+    });
 
     const login = await authService.login({
       email: 'auth@auth.com',
@@ -66,7 +73,9 @@ describe('Vehicle - /vehicles (e2e)', () => {
   });
 
   it(`/GET vehicles`, async () => {
-    const payload = VehicleFakerBuilder.aVehicle().build();
+    const payload = VehicleFakerBuilder.aVehicle()
+      .withVehicleTypeId(vehicleType.id)
+      .build();
     await repository.save(payload);
 
     const response = await request(app.getHttpServer())
@@ -106,6 +115,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
   it(`/POST vehicles`, async () => {
     const payload = VehicleFakerBuilder.aVehicle()
+      .withVehicleTypeId(vehicleType.id)
       .withLicensePlate('ABC1234')
       .build();
 
@@ -120,6 +130,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
   it(`/POST vehicles (UnprocessableEntityException: Vehicle already registered)`, async () => {
     const payload = VehicleFakerBuilder.aVehicle()
+      .withVehicleTypeId(vehicleType.id)
       .withLicensePlate('ABC123')
       .build();
 
@@ -144,6 +155,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
   it(`/PATCH vehicles`, async () => {
     const payload = VehicleFakerBuilder.aVehicle()
+      .withVehicleTypeId(vehicleType.id)
       .withLicensePlate('ABC123')
       .build();
 
@@ -220,6 +232,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
   it(`/DELETE vehicles`, async () => {
     const payload = VehicleFakerBuilder.aVehicle()
+      .withVehicleTypeId(vehicleType.id)
       .withLicensePlate('ABC123')
       .build();
 
