@@ -7,7 +7,6 @@ import { DataSource } from 'typeorm';
 
 import { AuthService } from '@app/auth/auth.service';
 import { CompanyRepository } from '@app/company/company.repository';
-import { Company } from '@app/company/entities/company.entity';
 import {
   clearRepositories,
   createNestApplication,
