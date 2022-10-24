@@ -8,9 +8,12 @@ import { DataSource } from 'typeorm';
 import { AuthService } from '@app/auth/auth.service';
 import { Company } from '@app/company/entities/company.entity';
 import { CompanyFakerBuilder } from '@app/company/tests/faker-builder/company-faker-builder';
+import { CompanyVacancy } from '@app/company_vacancy/entities/company_vacancy.entity';
+import { CompanyVacancyFakerBuilder } from '@app/company_vacancy/tests/faker-builder/company_vacancy-faker-builder';
 import { VacancyRepository } from '@app/vacancy/vacancy.repository';
 import { Vehicle } from '@app/vehicle/entities/vehicle.entity';
 import { VehicleFakerBuilder } from '@app/vehicle/tests/faker-builder/vehicle-faker-builder';
+import { VehicleType } from '@app/vehicle_type/entities/vehicle_type.entity';
 import {
   clearRepositories,
   createNestApplication,
@@ -24,6 +27,8 @@ describe('Vacancy - /vacancies (e2e)', () => {
   let dbConnection: DataSource;
   let repository: VacancyRepository;
   let company: Company;
+  let companyVacancy: CompanyVacancy;
+  let vehicleType: VehicleType;
   let vehicle: Vehicle;
   let authService: AuthService;
   let accessToken: string;
@@ -47,10 +52,26 @@ describe('Vacancy - /vacancies (e2e)', () => {
       .build();
     company = await dbConnection.manager.save(Company, companyPayload);
 
+    vehicleType = await dbConnection.manager.save(VehicleType, {
+      name: 'Car',
+      is_active: true,
+    });
     const vehiclePayload = VehicleFakerBuilder.aVehicle()
+      .withVehicleTypeId(vehicleType.id)
       .withLicensePlate('ABC1234')
       .build();
+
     vehicle = await dbConnection.manager.save(Vehicle, vehiclePayload);
+
+    const companyVacancyPayload = CompanyVacancyFakerBuilder.aCompanyVacancy()
+      .withCompanyId(company.id)
+      .withVehicleTypeId(vehicleType.id)
+      .withQuantity(2)
+      .build();
+    companyVacancy = await dbConnection.manager.save(
+      CompanyVacancy,
+      companyVacancyPayload,
+    );
 
     const login = await authService.login({
       email: 'auth@auth.com',
@@ -88,8 +109,8 @@ describe('Vacancy - /vacancies (e2e)', () => {
 
     expect(validateUUIDV4(response.body[0].id)).toBeTruthy();
 
-    expect(response.body[0].company_id).toEqual(payload.company_id);
-    expect(response.body[0].vehicle_id).toEqual(payload.vehicle_id);
+    expect(response.body[0].company.id).toEqual(payload.company_id);
+    expect(response.body[0].vehicle.id).toEqual(payload.vehicle_id);
     expect(response.body[0].created_at).toEqual(
       payload.created_at.toISOString(),
     );
@@ -115,11 +136,110 @@ describe('Vacancy - /vacancies (e2e)', () => {
     expect(response.body).toEqual({});
   });
 
+  it(`/POST vacancies (NotFoundException: Vehicle not found)`, async () => {
+    const vehiclePayload = VehicleFakerBuilder.aVehicle()
+      .withVehicleTypeId(vehicleType.id)
+      .withLicensePlate('ABC1234')
+      .deactivate()
+      .build();
+
+    vehicle = await dbConnection.manager.save(Vehicle, vehiclePayload);
+
+    const payload = VacancyFakerBuilder.aVacancy()
+      .withCompanyId(company.id)
+      .withVehicleId(vehicle.id)
+      .withDateIn('2022-10-22 10:00:00')
+      .withDateOut(null)
+      .build();
+
+    const response = await request(app.getHttpServer())
+      .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(payload)
+      .expect(HttpStatus.NOT_FOUND);
+
+    expect(response.body).toStrictEqual({
+      statusCode: HttpStatus.NOT_FOUND,
+      message: 'Vehicle not found',
+      error: 'Not Found',
+    });
+  });
+
+  it(`/POST vacancies (NotFoundException: Vacancy not registered)`, async () => {
+    const payload = VacancyFakerBuilder.aVacancy()
+      .withCompanyId(company.id)
+      .withVehicleId(vehicle.id)
+      .withDateIn('2022-10-22 10:00:00')
+      .withDateOut(null)
+      .build();
+
+    await dbConnection.manager.delete(CompanyVacancy, {});
+
+    const response = await request(app.getHttpServer())
+      .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(payload)
+      .expect(HttpStatus.NOT_FOUND);
+
+    expect(response.body).toStrictEqual({
+      statusCode: HttpStatus.NOT_FOUND,
+      message: 'Vacancy not registered',
+      error: 'Not Found',
+    });
+  });
+
+  it(`/POST vacancies (BadRequestException: This vacancy is full)`, async () => {
+    const payload_1 = VacancyFakerBuilder.aVacancy()
+      .withCompanyId(company.id)
+      .withVehicleId(vehicle.id)
+      .withDateIn('2022-10-22 10:00:00')
+      .withDateOut(null)
+      .build();
+
+    await request(app.getHttpServer())
+      .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(payload_1)
+      .expect(HttpStatus.CREATED);
+
+    const payload_2 = VacancyFakerBuilder.aVacancy()
+      .withCompanyId(company.id)
+      .withVehicleId(vehicle.id)
+      .withDateIn('2022-10-22 11:00:00')
+      .withDateOut(null)
+      .build();
+
+    await request(app.getHttpServer())
+      .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(payload_2);
+
+    const payload_3 = VacancyFakerBuilder.aVacancy()
+      .withCompanyId(company.id)
+      .withVehicleId(vehicle.id)
+      .withDateIn('2022-10-22 12:00:00')
+      .withDateOut(null)
+      .build();
+
+    const response = await request(app.getHttpServer())
+      .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(payload_3)
+      .expect(HttpStatus.BAD_REQUEST);
+
+    expect(response.body).toStrictEqual({
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'This vacancy is full',
+      error: 'Bad Request',
+    });
+  });
+
   it(`/POST vacancies (UnprocessableEntityException: Vacancy already registered)`, async () => {
     const payload = VacancyFakerBuilder.aVacancy()
       .withCompanyId(company.id)
       .withVehicleId(vehicle.id)
       .withDateIn('2022-10-22 10:00:00')
+      .withDateOut(null)
       .build();
 
     await request(app.getHttpServer())
@@ -159,8 +279,8 @@ describe('Vacancy - /vacancies (e2e)', () => {
       .expect(HttpStatus.OK);
 
     expect(validateUUIDV4(createdVacancy.body[0].id)).toBeTruthy();
-    expect(createdVacancy.body[0].company_id).toEqual(payload.company_id);
-    expect(createdVacancy.body[0].vehicle_id).toEqual(payload.vehicle_id);
+    expect(createdVacancy.body[0].company.id).toEqual(payload.company_id);
+    expect(createdVacancy.body[0].vehicle.id).toEqual(payload.vehicle_id);
     expect(
       dayjs(createdVacancy.body[0].date_in).format('YYYY-MM-DD HH:mm'),
     ).toEqual(dayjs(payload.date_in).format('YYYY-MM-DD HH:mm'));
