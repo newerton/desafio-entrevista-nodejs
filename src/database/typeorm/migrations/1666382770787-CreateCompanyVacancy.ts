@@ -25,7 +25,7 @@ export class CreateCompanyVacancy1666382770787 implements MigrationInterface {
             generationStrategy: 'uuid',
           },
           {
-            name: 'vehicle_id',
+            name: 'vehicle_type_id',
             type: 'varchar',
             generationStrategy: 'uuid',
           },
@@ -73,8 +73,8 @@ export class CreateCompanyVacancy1666382770787 implements MigrationInterface {
     await queryRunner.createForeignKey(
       'company_vacancy',
       new TableForeignKey({
-        name: 'fk-company_vacancy-vehicle_id',
-        columnNames: ['vehicle_id'],
+        name: 'fk-company_vacancy-vehicle_type_id',
+        columnNames: ['vehicle_type_id'],
         referencedTableName: 'vehicle_type',
         referencedColumnNames: ['id'],
         onUpdate: 'CASCADE',
@@ -93,8 +93,8 @@ export class CreateCompanyVacancy1666382770787 implements MigrationInterface {
     await queryRunner.createIndex(
       'company_vacancy',
       new TableIndex({
-        name: 'fk-company_vacancy-vehicle_id',
-        columnNames: ['vehicle_id'],
+        name: 'fk-company_vacancy-vehicle_type_id',
+        columnNames: ['vehicle_type_id'],
         parser: 'btree',
       }),
     );
