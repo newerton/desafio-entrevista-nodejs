@@ -24,11 +24,7 @@
     "test:staged": "npm test -- --findRelatedTests",
     "test:unit": "npm test -- --watch -c jest-unit-config.js",
     "prepare": "husky install",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "typeorm:dev": "env NODE_ENV=migration ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "migration:create": "env NODE_ENV=development npm run typeorm migration:create -- -n",
-    "subscriber:create": "env NODE_ENV=development npm run typeorm subscriber:create -d ./src/database.providers.ts -- -n",
-    "cli": "env NODE_ENV=migration ts-node -r tsconfig-paths/register ./src/commander.ts"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
     "@nestjs/axios": "^0.1.0",
