@@ -70,4 +70,63 @@ describe('Auth - /auth (e2e)', () => {
     const diff = expires.diff(now, 'days');
     expect(diff).toEqual(expiresInNumber);
   });
+
+  it(`/POST auth/login (invalid email)`, async () => {
+    const credentials: AuthLoginInput = {
+      email: 'invalid_email@test.com',
+      password: '123456',
+    };
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(credentials)
+      .expect(HttpStatus.BAD_REQUEST);
+
+    expect(response.body).toEqual({
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'E-mail or password invalid',
+      error: 'Bad Request',
+    });
+  });
+
+  it(`/POST auth/login (invalid password)`, async () => {
+    const credentials: AuthLoginInput = {
+      email: 'test@test.com',
+      password: '1234567',
+    };
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(credentials)
+      .expect(HttpStatus.BAD_REQUEST);
+
+    expect(response.body).toEqual({
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'E-mail or password invalid',
+      error: 'Bad Request',
+    });
+  });
+
+  it(`/POST auth/login (user inactive)`, async () => {
+    const password = await hash('123456', 8);
+    const companyPayload = CompanyFakerBuilder.aCompany()
+      .withEmail('user_inactive@test.com')
+      .withPassword(password)
+      .deactivate()
+      .build();
+    company = await dbConnection.manager.save(Company, companyPayload);
+
+    const credentials: AuthLoginInput = {
+      email: 'user_inactive@test.com',
+      password: '123456',
+    };
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(credentials)
+      .expect(HttpStatus.BAD_REQUEST);
+
+    expect(response.body).toEqual({
+      statusCode: HttpStatus.BAD_REQUEST,
+      message: 'E-mail or password invalid',
+      error: 'Bad Request',
+    });
+  });
 });

@@ -1,9 +1,12 @@
 import { faker } from '@faker-js/faker';
 import { HttpStatus, INestApplication } from '@nestjs/common';
+import { hash } from 'bcrypt';
 import dayjs from 'dayjs';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 
+import { AuthService } from '@app/auth/auth.service';
+import { AuthLoginInput } from '@app/auth/dto/auth-login.dto';
 import { Company } from '@app/company/entities/company.entity';
 import { CompanyFakerBuilder } from '@app/company/tests/faker-builder/company-faker-builder';
 import { VacancyRepository } from '@app/vacancy/vacancy.repository';
@@ -23,38 +26,53 @@ describe('Vacancy - /vacancies (e2e)', () => {
   let repository: VacancyRepository;
   let company: Company;
   let vehicle: Vehicle;
+  let authService: AuthService;
+  let accessToken: string;
 
   beforeAll(async () => {
     app = await createNestApplication({
       onBeforeInit: (moduleRef) => {
         dbConnection = moduleRef.get(DataSource);
         repository = moduleRef.get(VacancyRepository);
+        authService = moduleRef.get(AuthService);
       },
     });
   });
 
   beforeEach(async () => {
     await clearRepositories(dbConnection);
-    const companyPayload = CompanyFakerBuilder.aCompany().build();
+    const password = await hash('123456', 8);
+    const companyPayload = CompanyFakerBuilder.aCompany()
+      .withEmail('auth@auth.com')
+      .withPassword(password)
+      .build();
     company = await dbConnection.manager.save(Company, companyPayload);
 
     const vehiclePayload = VehicleFakerBuilder.aVehicle()
       .withLicensePlate('ABC1234')
       .build();
     vehicle = await dbConnection.manager.save(Vehicle, vehiclePayload);
+
+    const login = await authService.login({
+      email: 'auth@auth.com',
+      password: '123456',
+    });
+    accessToken = login.access_token;
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it(`/GET vacancies (empty result)`, async () => {
+  it(`/GET vacancies (without Bearer)`, async () => {
     const response = await request(app.getHttpServer())
       .get('/vacancies')
-      .send()
-      .expect(HttpStatus.OK);
+      .expect(HttpStatus.UNAUTHORIZED);
 
-    expect(response.body).toEqual([]);
+    expect(response.body).toEqual({
+      message: 'Unauthorized',
+      statusCode: HttpStatus.UNAUTHORIZED,
+    });
   });
 
   it(`/GET vacancies`, async () => {
@@ -66,6 +84,7 @@ describe('Vacancy - /vacancies (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .get('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(validateUUIDV4(response.body[0].id)).toBeTruthy();
@@ -90,6 +109,7 @@ describe('Vacancy - /vacancies (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
@@ -105,11 +125,13 @@ describe('Vacancy - /vacancies (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -128,11 +150,13 @@ describe('Vacancy - /vacancies (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const createdVacancy = await request(app.getHttpServer())
       .get('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(validateUUIDV4(createdVacancy.body[0].id)).toBeTruthy();
@@ -151,11 +175,13 @@ describe('Vacancy - /vacancies (e2e)', () => {
     const dateUpdated = dayjs();
     await request(app.getHttpServer())
       .patch(`/vacancies/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({ date_in: dateUpdated })
       .expect(HttpStatus.NO_CONTENT);
 
     const updatedVacancy = await request(app.getHttpServer())
       .get(`/vacancies/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(dayjs(updatedVacancy.body.updated_at).isValid()).toBeTruthy();
@@ -176,6 +202,7 @@ describe('Vacancy - /vacancies (e2e)', () => {
   it(`/PATCH vacancies (NotFoundException: Vacancy not found)`, async () => {
     const response = await request(app.getHttpServer())
       .patch(`/vacancies/${faker.datatype.uuid()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({ name: `Bicycle UPDATED` })
       .expect(HttpStatus.NOT_FOUND);
 
@@ -194,11 +221,13 @@ describe('Vacancy - /vacancies (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .get('/vacancies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.OK);
 
@@ -206,6 +235,7 @@ describe('Vacancy - /vacancies (e2e)', () => {
 
     const deletedVacancy = await request(app.getHttpServer())
       .delete(`/vacancies/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.NO_CONTENT);
 
     expect(deletedVacancy.body).toEqual({});
@@ -214,6 +244,7 @@ describe('Vacancy - /vacancies (e2e)', () => {
   it(`/DELETE vacancies (NotFoundException: Vacancy not found)`, async () => {
     const response = await request(app.getHttpServer())
       .delete(`/vacancies/${faker.datatype.uuid()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.NOT_FOUND);
 
     expect(response.body).toStrictEqual({

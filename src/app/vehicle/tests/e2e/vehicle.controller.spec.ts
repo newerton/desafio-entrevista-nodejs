@@ -1,9 +1,13 @@
 import { faker } from '@faker-js/faker';
 import { HttpStatus, INestApplication } from '@nestjs/common';
+import { hash } from 'bcrypt';
 import dayjs from 'dayjs';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 
+import { AuthService } from '@app/auth/auth.service';
+import { Company } from '@app/company/entities/company.entity';
+import { CompanyFakerBuilder } from '@app/company/tests/faker-builder/company-faker-builder';
 import { VehicleRepository } from '@app/vehicle/vehicle.repository';
 import {
   clearRepositories,
@@ -17,31 +21,48 @@ describe('Vehicle - /vehicles (e2e)', () => {
   let app: INestApplication;
   let dbConnection: DataSource;
   let repository: VehicleRepository;
+  let authService: AuthService;
+  let accessToken: string;
 
   beforeAll(async () => {
     app = await createNestApplication({
       onBeforeInit: (moduleRef) => {
         dbConnection = moduleRef.get(DataSource);
         repository = moduleRef.get(VehicleRepository);
+        authService = moduleRef.get(AuthService);
       },
     });
   });
 
   beforeEach(async () => {
     await clearRepositories(dbConnection);
+    const password = await hash('123456', 8);
+    const companyPayload = CompanyFakerBuilder.aCompany()
+      .withEmail('auth@auth.com')
+      .withPassword(password)
+      .build();
+    await dbConnection.manager.save(Company, companyPayload);
+
+    const login = await authService.login({
+      email: 'auth@auth.com',
+      password: '123456',
+    });
+    accessToken = login.access_token;
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it(`/GET vehicles (empty result)`, async () => {
+  it(`/GET vehicles (without Bearer)`, async () => {
     const response = await request(app.getHttpServer())
       .get('/vehicles')
-      .send()
-      .expect(HttpStatus.OK);
+      .expect(HttpStatus.UNAUTHORIZED);
 
-    expect(response.body).toEqual([]);
+    expect(response.body).toEqual({
+      message: 'Unauthorized',
+      statusCode: HttpStatus.UNAUTHORIZED,
+    });
   });
 
   it(`/GET vehicles`, async () => {
@@ -50,6 +71,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .get('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     const lastVehiclePayload = payload;
@@ -89,6 +111,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .post('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
@@ -102,11 +125,13 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .post('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -124,11 +149,13 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const createdVehicle = await request(app.getHttpServer())
       .get('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(validateUUIDV4(createdVehicle.body[0].id)).toBeTruthy();
@@ -147,11 +174,13 @@ describe('Vehicle - /vehicles (e2e)', () => {
     const { id } = createdVehicle.body[0];
     await request(app.getHttpServer())
       .patch(`/vehicles/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({ type: `${payload.type} UPDATED` })
       .expect(HttpStatus.NO_CONTENT);
 
     const updatedVehicle = await request(app.getHttpServer())
       .get(`/vehicles/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(updatedVehicle.body.type).toEqual(`${payload.type} UPDATED`);
@@ -178,6 +207,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
   it(`/PATCH vehicles (NotFoundException: Vehicle not found)`, async () => {
     const response = await request(app.getHttpServer())
       .patch(`/vehicles/${faker.datatype.uuid()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({ type: `${faker.vehicle.type()} UPDATED` })
       .expect(HttpStatus.NOT_FOUND);
 
@@ -195,11 +225,13 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .get('/vehicles')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.OK);
 
@@ -207,6 +239,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
 
     const deletedVehicle = await request(app.getHttpServer())
       .delete(`/vehicles/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.NO_CONTENT);
 
     expect(deletedVehicle.body).toEqual({});
@@ -215,6 +248,7 @@ describe('Vehicle - /vehicles (e2e)', () => {
   it(`/DELETE vehicles (NotFoundException: Vehicle not found)`, async () => {
     const response = await request(app.getHttpServer())
       .delete(`/vehicles/${faker.datatype.uuid()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.NOT_FOUND);
 
     expect(response.body).toStrictEqual({

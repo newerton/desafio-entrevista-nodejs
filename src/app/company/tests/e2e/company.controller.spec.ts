@@ -1,10 +1,13 @@
 import { faker } from '@faker-js/faker';
 import { HttpStatus, INestApplication } from '@nestjs/common';
+import { hash } from 'bcrypt';
 import dayjs from 'dayjs';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 
+import { AuthService } from '@app/auth/auth.service';
 import { CompanyRepository } from '@app/company/company.repository';
+import { Company } from '@app/company/entities/company.entity';
 import {
   clearRepositories,
   createNestApplication,
@@ -18,31 +21,48 @@ describe('Company - /companies (e2e)', () => {
   let app: INestApplication;
   let dbConnection: DataSource;
   let repository: CompanyRepository;
+  let authService: AuthService;
+  let accessToken: string;
 
   beforeAll(async () => {
     app = await createNestApplication({
       onBeforeInit: (moduleRef) => {
         dbConnection = moduleRef.get(DataSource);
         repository = moduleRef.get(CompanyRepository);
+        authService = moduleRef.get(AuthService);
       },
     });
   });
 
   beforeEach(async () => {
     await clearRepositories(dbConnection);
+    const password = await hash('123456', 8);
+    const companyPayload = CompanyFakerBuilder.aCompany()
+      .withEmail('auth@auth.com')
+      .withPassword(password)
+      .build();
+    await repository.save(companyPayload);
+
+    const login = await authService.login({
+      email: 'auth@auth.com',
+      password: '123456',
+    });
+    accessToken = login.access_token;
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it(`/GET companies (empty result)`, async () => {
+  it(`/GET companies (without Bearer)`, async () => {
     const response = await request(app.getHttpServer())
       .get('/companies')
-      .send()
-      .expect(HttpStatus.OK);
+      .expect(HttpStatus.UNAUTHORIZED);
 
-    expect(response.body).toEqual([]);
+    expect(response.body).toEqual({
+      message: 'Unauthorized',
+      statusCode: HttpStatus.UNAUTHORIZED,
+    });
   });
 
   it(`/GET companies`, async () => {
@@ -51,6 +71,7 @@ describe('Company - /companies (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .get('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     const lastCompanyPayload = payload;
@@ -91,6 +112,7 @@ describe('Company - /companies (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .post('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
@@ -107,11 +129,13 @@ describe('Company - /companies (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(company)
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .get('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(validateUUIDV4(response.body[0].id)).toBeTruthy();
@@ -136,11 +160,13 @@ describe('Company - /companies (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .post('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -158,11 +184,13 @@ describe('Company - /companies (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const createdCompany = await request(app.getHttpServer())
       .get('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(validateUUIDV4(createdCompany.body[0].id)).toBeTruthy();
@@ -178,11 +206,13 @@ describe('Company - /companies (e2e)', () => {
     const { id } = createdCompany.body[0];
     await request(app.getHttpServer())
       .patch(`/companies/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({ social_name: `${payload.social_name} UPDATED` })
       .expect(HttpStatus.NO_CONTENT);
 
     const updatedCompany = await request(app.getHttpServer())
       .get(`/companies/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
     expect(updatedCompany.body.social_name).toEqual(
@@ -210,6 +240,7 @@ describe('Company - /companies (e2e)', () => {
   it(`/PATCH companies (NotFoundException: Company not found)`, async () => {
     const response = await request(app.getHttpServer())
       .patch(`/companies/${faker.datatype.uuid()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .send({ social_name: `${faker.company.name()} UPDATED` })
       .expect(HttpStatus.NOT_FOUND);
 
@@ -227,11 +258,13 @@ describe('Company - /companies (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.CREATED);
 
     const response = await request(app.getHttpServer())
       .get('/companies')
+      .set('Authorization', `Bearer ${accessToken}`)
       .send(payload)
       .expect(HttpStatus.OK);
 
@@ -239,6 +272,7 @@ describe('Company - /companies (e2e)', () => {
 
     const deletedCompany = await request(app.getHttpServer())
       .delete(`/companies/${id}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.NO_CONTENT);
 
     expect(deletedCompany.body).toEqual({});
@@ -247,6 +281,7 @@ describe('Company - /companies (e2e)', () => {
   it(`/DELETE companies (NotFoundException: Company not found)`, async () => {
     const response = await request(app.getHttpServer())
       .delete(`/companies/${faker.datatype.uuid()}`)
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.NOT_FOUND);
 
     expect(response.body).toStrictEqual({
