@@ -4,6 +4,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 
+import { AuthModule } from '@app/auth/auth.module';
 import { CompanyModule } from '@app/company/company.module';
 import { CompanyVacancyModule } from '@app/company_vacancy/company_vacancy.module';
 import { IbgeModule } from '@app/ibge/ibge.module';
@@ -29,6 +30,7 @@ import { databaseConfig } from '@common/config/database';
       }),
     }),
     TypeOrmModule.forRoot(databaseConfig),
+    AuthModule,
     CompanyModule,
     CompanyVacancyModule,
     VacancyModule,
