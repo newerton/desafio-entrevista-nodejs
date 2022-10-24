@@ -1,7 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Column, Entity, JoinTable, OneToOne, Relation } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  OneToMany,
+  OneToOne,
+  Relation,
+} from 'typeorm';
 
+import { CompanyVacancy } from '@app/company_vacancy/entities/company_vacancy.entity';
 import { BaseEntity } from '@common/entity';
 
 import { CompanyAddress } from './company_address.entity';
@@ -51,4 +59,9 @@ export class Company extends BaseEntity {
   })
   @JoinTable()
   address: Relation<CompanyAddress>;
+
+  @ApiProperty()
+  @OneToMany(() => CompanyVacancy, (companyVacancy) => companyVacancy.company)
+  @JoinTable()
+  vacancies: Relation<CompanyVacancy[]>;
 }
