@@ -1,16 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  OneToOne,
-  Relation,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
 
 import { Company } from '@app/company/entities/company.entity';
-import { CompanyVacancy } from '@app/company_vacancy/entities/company_vacancy.entity';
 import { Vehicle } from '@app/vehicle/entities/vehicle.entity';
 import { BaseEntity } from '@common/entity';
 

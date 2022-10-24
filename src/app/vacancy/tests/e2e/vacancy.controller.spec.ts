@@ -6,7 +6,6 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 
 import { AuthService } from '@app/auth/auth.service';
-import { AuthLoginInput } from '@app/auth/dto/auth-login.dto';
 import { Company } from '@app/company/entities/company.entity';
 import { CompanyFakerBuilder } from '@app/company/tests/faker-builder/company-faker-builder';
 import { VacancyRepository } from '@app/vacancy/vacancy.repository';
