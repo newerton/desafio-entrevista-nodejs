@@ -32,6 +32,8 @@ async function bootstrap() {
   const customOptions: SwaggerCustomOptions = {
     swaggerOptions: {
       persistAuthorization: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
     },
     customSiteTitle: 'Parking API Docs',
   };
