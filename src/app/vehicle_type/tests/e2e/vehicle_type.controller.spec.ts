@@ -213,7 +213,7 @@ describe('Vehicle Type - /vehicle-types (e2e)', () => {
     expect(deletedVehicleType.body).toEqual({});
   });
 
-  it(`/DELETE vehicle-types (NotFoundException: VehicleType not found)`, async () => {
+  it(`/DELETE vehicle-types (NotFoundException: Vehicle Type not found)`, async () => {
     const response = await request(app.getHttpServer())
       .delete(`/vehicle-types/${faker.datatype.uuid()}`)
       .set('Authorization', `Bearer ${accessToken}`)
