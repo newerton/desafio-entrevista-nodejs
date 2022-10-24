@@ -66,6 +66,13 @@ export class CompanyRepository extends Repository<Company> {
     });
   }
 
+  async findByEmail(email: string): Promise<Company> {
+    return this.findOne({
+      where: { email },
+      relations: ['address'],
+    });
+  }
+
   async updateCompany(id: string, updateCompanyDto: UpdateCompanyInput) {
     const model = await this.findById(id);
     if (!model) {

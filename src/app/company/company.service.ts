@@ -20,6 +20,10 @@ export class CompanyService {
     return this.repository.findById(id);
   }
 
+  async findOneByEmail(id: string): Promise<Company> {
+    return this.repository.findByEmail(id);
+  }
+
   async update(
     id: string,
     updateCompanyDto: UpdateCompanyInput,
