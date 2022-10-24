@@ -5,8 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 
 import { CompanyModule } from '@app/company/company.module';
+import { CompanyVacancyModule } from '@app/company_vacancy/company_vacancy.module';
 import { IbgeModule } from '@app/ibge/ibge.module';
 import { VehicleModule } from '@app/vehicle/vehicle.module';
+import { VehicleTypeModule } from '@app/vehicle_type/vehicle_type.module';
 import configuration from '@common/config/configuration';
 import { databaseConfig } from '@common/config/database';
 
@@ -27,7 +29,9 @@ import { databaseConfig } from '@common/config/database';
     }),
     TypeOrmModule.forRoot(databaseConfig),
     CompanyModule,
+    CompanyVacancyModule,
     VehicleModule,
+    VehicleTypeModule,
     IbgeModule,
   ],
   providers: [
