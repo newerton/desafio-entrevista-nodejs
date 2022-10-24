@@ -32,15 +32,14 @@ export class CreateVacancy1666573409642 implements MigrationInterface {
           {
             name: 'date_in',
             type: 'datetime',
+            isNullable: true,
+            default: null,
           },
           {
             name: 'date_out',
             type: 'datetime',
-          },
-          {
-            name: 'is_active',
-            type: 'boolean',
-            default: true,
+            isNullable: true,
+            default: null,
           },
           {
             name: 'created_at',
