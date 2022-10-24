@@ -46,7 +46,7 @@ export class CompanyRepository extends Repository<Company> {
       document,
       phone,
       is_active,
-      address,
+      ...(address && address.zipcode ? { address } : {}),
     });
   }
 

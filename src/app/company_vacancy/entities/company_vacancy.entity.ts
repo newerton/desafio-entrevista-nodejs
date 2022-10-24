@@ -15,7 +15,7 @@ import { BaseEntity } from '@common/entity';
 
 @Entity('company_vacancy')
 export class CompanyVacancy extends BaseEntity {
-  @ApiProperty()
+  @ApiProperty({ type: 'string' })
   @Column('uuid')
   @Exclude()
   company_id: string;
@@ -33,7 +33,6 @@ export class CompanyVacancy extends BaseEntity {
   @Column({ default: true })
   is_active?: boolean;
 
-  @ApiProperty()
   @ManyToOne(() => Company, (company) => company.vacancies, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

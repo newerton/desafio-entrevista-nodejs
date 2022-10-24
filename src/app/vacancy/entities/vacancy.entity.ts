@@ -22,7 +22,7 @@ export class Vacancy extends BaseEntity {
   @Column({ type: 'datetime', nullable: true, default: null })
   date_out?: Date;
 
-  @ApiProperty()
+  @ApiProperty({ type: [CompanyVacancy] })
   @OneToOne(
     () => CompanyVacancy,
     (companyVacancy) => companyVacancy.vehicleType,

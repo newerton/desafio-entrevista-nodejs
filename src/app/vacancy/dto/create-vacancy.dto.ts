@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVacancyInput {
-  @ApiProperty({ type: 'uuid', example: '' })
-  readonly company_id: string;
+  company_id: string;
 
   @ApiProperty({ type: 'uuid', example: '' })
   readonly vehicle_id: string;

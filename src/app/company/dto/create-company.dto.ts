@@ -11,7 +11,7 @@ export class CreateCompanyInput {
   @ApiProperty({ example: faker.company.name() })
   readonly fantasy_name: string;
 
-  @ApiProperty({ example: faker.internet.email() })
+  @ApiProperty({ example: faker.internet.email().toLowerCase() })
   readonly email: string;
 
   @ApiProperty({ example: '123456' })
