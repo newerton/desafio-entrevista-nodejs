@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Column, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
 import { Company } from '@app/company/entities/company.entity';
 import { Vehicle } from '@app/vehicle/entities/vehicle.entity';
@@ -27,12 +27,12 @@ export class Vacancy extends BaseEntity {
   date_out?: Date;
 
   @ApiProperty({ type: Company })
-  @OneToOne(() => Company)
+  @ManyToOne(() => Company, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'company_id' })
-  company: Relation<Company>;
+  company: Relation<Company[]>;
 
   @ApiProperty({ type: Vehicle })
-  @OneToOne(() => Vehicle)
+  @ManyToOne(() => Vehicle, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'vehicle_id' })
-  vehicle: Relation<Vehicle>;
+  vehicle: Relation<Vehicle[]>;
 }
